@@ -1,0 +1,769 @@
+local window
+local label
+local button
+local tab1
+local tabPanel
+
+isVisible = false
+function createGUI()
+    window = guiCreateWindow(0.3, 0.2, 0.5, 0.6, "META-MENU", true)
+
+    label = guiCreateLabel(0.1, 0.2, 0.3, 0.5, "", true, window)
+    guiLabelSetHorizontalAlign(label, "center", true)
+	-- lua exectour
+    if not isVisible then
+        isVisible = true
+        guiSetVisible( window, true)
+        showCursor ( true )
+        guiWindowSetSizable ( window, false )
+
+
+        commandstring = guiCreateMemo(0.73, 0.09, 1.5, 0.75, "", true, window)
+        debugString = guiCreateButton(0.73, 0.85, 0.4, 0.1, "inject LUA", true, window)
+
+        addEventHandler("onClientGUIClick", debugString, runString, false)
+    end
+--
+	tabPanel = guiCreateTabPanel(0.01, 0.05, 0.7, 0.9, true, window)
+	
+	tab1 = guiCreateTab("乡", tabPanel)
+    label1 = guiCreateLabel(0.07, 0.01, 0.8, 0.8, "Discord ID : cheater.1 | META Cheats | ", true, tab1)
+    guiLabelSetHorizontalAlign(label1, "center", true)
+	guiLabelSetColor(label1, 250, 0, 0)
+
+--
+    button = guiCreateButton(0.3, 0.85, 0.3, 0.1, "X", true, tab1)
+	carbomm = guiCreateButton(0.05, 0.05, 0.2, 0.1, "Explode Car", true, tab1)
+	freecam = guiCreateButton(0.05, 0.17, 0.2, 0.1, "Freecam", true, tab1)
+	airbreak = guiCreateButton(0.05, 0.29, 0.2, 0.1, "AirBreak", true, tab1)
+	revive = guiCreateButton(0.05, 0.41, 0.2, 0.1, "Revive", true, tab1)
+	bombclick = guiCreateButton(0.27, 0.17, 0.2, 0.1, "Bomb Click (Mix)", true, tab1)
+    explodeplayer = guiCreateButton(0.27, 0.29, 0.2, 0.1, "Explode Player", true, tab1)
+	unlockvehicles = guiCreateButton(0.27, 0.41, 0.2, 0.1, "Unlock Vehicles", true, tab1)
+	carfly = guiCreateButton(0.27, 0.05, 0.2, 0.1, "Car Fly", true, tab1)
+	fixcar = guiCreateButton(0.49, 0.05, 0.2, 0.1, "Fix Veh", true, tab1)
+	addnitro = guiCreateButton(0.49, 0.17, 0.2, 0.1, "Add Nitro", true, tab1)
+	aimbot = guiCreateButton(0.49, 0.29, 0.2, 0.1, "AimBot(OnlyPlayer)", true, tab1)
+	wallhack = guiCreateButton(0.49, 0.41, 0.2, 0.1, "WallHack", true, tab1)
+	carwall = guiCreateButton(0.71, 0.05, 0.2, 0.1, "Car Wall", true, tab1)
+	clearchatbox = guiCreateButton(0.71, 0.17, 0.2, 0.1, "Clear Chat Box", true, tab1)
+	fireyourself = guiCreateButton(0.71, 0.29, 0.2, 0.1, "Fire Yourself", true, tab1)
+	hparmor = guiCreateButton(0.71, 0.41, 0.2, 0.1, "Hp/Armor", true, tab1)
+	SkinID = guiCreateEdit(0.1, 0.7, 0.3, 0.1, "", true, tab1)
+	set = guiCreateButton(0.5, 0.7, 0.3, 0.1, "Set-Skin", true, tab1)
+--
+    addEventHandler("onClientGUIClick", button, closeGUI, false)
+    addEventHandler("onClientGUIClick", explodeplayer, explodeplayerr, false)
+	addEventHandler("onClientGUIClick", carbomm, carbommm, false)
+	addEventHandler("onClientGUIClick", fixcar, fixcarr, false)
+    addEventHandler("onClientGUIClick", freecam, freecamm, false)
+    addEventHandler("onClientGUIClick", airbreak, airbreakk, false)
+    addEventHandler("onClientGUIClick", revive, revivee, false)
+    addEventHandler("onClientGUIClick", bombclick, bombclickk, false)
+    addEventHandler("onClientGUIClick", unlockvehicles, unlockvehicless, false)
+    addEventHandler("onClientGUIClick", carfly, carflyy, false)
+    addEventHandler("onClientGUIClick", addnitro, addnitroo, false)
+    addEventHandler("onClientGUIClick", aimbot, aimbott, false)
+    addEventHandler("onClientGUIClick", wallhack, wallhackk, false)
+    addEventHandler("onClientGUIClick", carwall, carwalll, false)
+    addEventHandler("onClientGUIClick", clearchatbox, clearchatboxx, false)
+    addEventHandler("onClientGUIClick", fireyourself, fireYourselff, false)
+    addEventHandler("onClientGUIClick", hparmor, hparmorr, false)
+    addEventHandler("onClientGUIClick", SkinID, SkinID, false)
+    addEventHandler("onClientGUIClick", set, sett, false)
+end
+-- KOS SHER
+function bombclickk()
+    if isEventHandlerAdded("onClientClick",root,toggleBombClick) then
+        removeEventHandler("onClientClick",root,toggleBombClick)
+    else
+        addEventHandler("onClientClick",root,toggleBombClick)
+    end
+end
+
+
+function toggleBombClick(button, state, _, _, x, y, z)
+    if not guiGetVisible(ShineBG) then
+        if (button == "left" and state == "down") then
+            createProjectile(localPlayer, 21, x, y, z + 0.1)
+            createProjectile(localPlayer, 17, x, y, z + 0.2)
+            createProjectile(localPlayer, 18, x, y, z + 0.3)
+            createProjectile(localPlayer, 19, x, y, z + 0.3)
+            createProjectile(localPlayer, 20, x, y, z + 0.4)
+            createProjectile(localPlayer, 22, x, y, z + 0.6)
+            createProjectile(localPlayer, 40, x, y, z + 0.8)
+
+            createProjectile(localPlayer, 21, x, y, z + 0.1)
+            createProjectile(localPlayer, 17, x, y, z + 0.2)
+            createProjectile(localPlayer, 18, x, y, z + 0.3)
+            createProjectile(localPlayer, 19, x, y, z + 0.3)
+            createProjectile(localPlayer, 20, x, y, z + 0.4)
+            createProjectile(localPlayer, 22, x, y, z + 0.6)
+            createProjectile(localPlayer, 40, x, y, z + 0.8)
+
+            createProjectile(localPlayer, 21, x, y, z + 0.1)
+            createProjectile(localPlayer, 17, x, y, z + 0.2)
+            createProjectile(localPlayer, 18, x, y, z + 0.3)
+            createProjectile(localPlayer, 19, x, y, z + 0.3)
+            createProjectile(localPlayer, 20, x, y, z + 0.4)
+            createProjectile(localPlayer, 22, x, y, z + 0.6)
+            createProjectile(localPlayer, 40, x, y, z + 0.8)
+
+            createProjectile(localPlayer, 21, x, y, z + 0.1)
+            createProjectile(localPlayer, 17, x, y, z + 0.2)
+            createProjectile(localPlayer, 18, x, y, z + 0.3)
+            createProjectile(localPlayer, 19, x, y, z + 0.3)
+            createProjectile(localPlayer, 20, x, y, z + 0.4)
+            createProjectile(localPlayer, 22, x, y, z + 0.6)
+            createProjectile(localPlayer, 40, x, y, z + 0.8)
+        end
+    end
+end
+function carbommm()
+        local vehicles = getElementsByType("vehicle") -- Get all vehicles on the server
+    
+        for _, vehicle in ipairs(vehicles) do -- Iterates over all vehicles
+            if isElementStreamedIn(vehicle) then -- Checks if the vehicle is charged at the customer
+                blowVehicle(vehicle) -- Explodes the current vehicle
+            end
+        end
+    
+        outputChatBox("All Veh Fucked.", 250, 0, 0) -- Displays a message stating that vehicles have been exploded
+    end
+
+function sett()
+    if tonumber(guiGetText(SkinID)) and tonumber(guiGetText(SkinID)) >= 0 then
+        if setElementModel(localPlayer,tonumber(guiGetText(SkinID))) then
+            outputChatBox("Your Skin Has Been Changed Successfully.",255,0,0)
+        else
+            outputChatBox("Invalid Skin ID.",250,0,0)
+        end
+    else
+        outputChatBox("Please Put Valid Number In Field.",255,0,0)
+    end
+end
+
+function hparmorr()
+    setElementHealth(localPlayer,100)
+    setPedArmor(localPlayer,100)
+end
+
+function fireYourselff()
+    setPedOnFire(localPlayer,true)
+end
+
+function clearchatboxx()
+    clearChatBox()
+end
+
+local isCarInfoVisible = false
+local laostClickTime = 0
+
+
+function carwalll()
+    local currentTime = getTickCount()
+
+        isCarInfoVisible = not isCarInfoVisible
+        outputChatBox("Car ESP Is Runned " .. (isCarInfoVisible and "ON" or "OFF"),250, 0, 0)
+    lastClickTime = currentTime
+end
+
+
+function drawCarInfo()
+    if not isCarInfoVisible then return end
+
+    local vehicles = getElementsByType("vehicle")
+    for _, vehicle in ipairs(vehicles) do
+        local x, y, z = getElementPosition(vehicle)
+        local cx, cy, cz = getCameraMatrix()
+
+        local distance = getDistanceBetweenPoints3D(x, y, z, cx, cy, cz)
+        if distance < 200 then -- Adjust the distance visibility as needed
+            local modelID = getElementModel(vehicle)
+            local model = getVehicleNameFromModel(modelID)
+            local doorState = isVehicleLocked(vehicle) and "Locked" or "Unlocked"
+            local text = "Model: " .. model .. " (ID: " .. modelID .. ")\nDoor: " .. doorState
+
+            local sx, sy = getScreenFromWorldPosition(x, y, z + 1)
+            if sx and sy then
+                dxDrawText(text, sx, sy, sx, sy, tocolor(255, 255, 255, 255), 1, "default", "center", "center", false, false, false, true)
+            end
+        end
+    end
+end
+
+addEventHandler("onClientRender", root, drawCarInfo)
+local isWallInfoVisible = false
+local laostClickTime = 0
+
+
+function wallhackk()
+    local currentTime = getTickCount()
+
+    isWallInfoVisible = not isWallInfoVisible
+        outputChatBox("Wall Hack Is Runned  " .. (isWallInfoVisible and "ON" or "OFF"),250, 0, 0)
+    lastClickTime = currentTime
+end
+
+createPed(120, 1255.01978, -2119.56812, 72.09354) -- Creating a pedestrian and saving its element
+function wallmta()
+    if not isWallInfoVisible then return end
+
+    local players = getElementsByType("player")
+    local peds = getElementsByType("ped")
+    local localPlayer = getLocalPlayer()
+    local screenWidth, screenHeight = guiGetScreenSize()
+    local boxWidth, boxHeight = 100, 20
+
+    for i, player in ipairs(players) do
+        if player ~= localPlayer and isElementOnScreen(player) then
+            local playerX, playerY, playerZ = getElementPosition(player)
+            local screenX, screenY = getScreenFromWorldPosition(playerX, playerY, playerZ + 1)
+            outputChatBox("[META] Run Shod ", 250 ,0 ,0)
+            if screenX and screenY then
+                local playerName = getPlayerName(player)
+                local health = getElementHealth(player)
+                local armor = getPedArmor(player)
+                local weapon = getPedWeapon(player)
+                local ammo = getPedTotalAmmo(player)
+
+                dxDrawRectangle(screenX - boxWidth / 2, screenY - boxHeight, boxWidth, boxHeight, tocolor(0, 0, 0, 150))
+                dxDrawText(playerName, screenX - boxWidth / 2, screenY - boxHeight, screenX + boxWidth / 2, screenY, tocolor(250, 0, 0), 1, "default-bold", "center", "center")
+                local hpText = "HP: " .. math.floor(health)
+                dxDrawText(hpText, screenX - boxWidth / 2, screenY - boxHeight - 20, screenX + boxWidth / 2, screenY - boxHeight - 10, tocolor(250, 0, 0), 1, "default-bold", "center", "center")
+                local armorText = "Armor: " .. math.floor(armor)
+                dxDrawText(armorText, screenX - boxWidth / 2, screenY - boxHeight - 35, screenX + boxWidth / 2, screenY - boxHeight - 25, tocolor(250, 0, 0), 1, "default-bold", "center", "center")
+                local weaponText = getWeaponNameFromID(weapon) or "Unknown"
+                local ammoText = "Ammo: " .. ammo
+                dxDrawText(weaponText, screenX - boxWidth / 2, screenY - boxHeight - 50, screenX + boxWidth / 2, screenY - boxHeight - 40, tocolor(250, 0, 0), 1, "default-bold", "center", "center")
+                dxDrawText(ammoText, screenX - boxWidth / 2, screenY - boxHeight - 65, screenX + boxWidth / 2, screenY - boxHeight - 55, tocolor(250, 0, 0), 1, "default-bold", "center", "center")
+
+                dxDrawLine(screenX - 5, screenY, screenX + 5, screenY, tocolor(250, 0, 0), 2)
+                dxDrawLine(screenX, screenY - 5, screenX, screenY + 5, tocolor(250, 0, 0), 2)
+            end
+        end
+    end
+
+    for i, ped in ipairs(peds) do
+        if isElementOnScreen(ped) then
+            local pedX, pedY, pedZ = getElementPosition(ped)
+            local screenX, screenY = getScreenFromWorldPosition(pedX, pedY, pedZ + 1)
+
+            if screenX and screenY then
+                local pedName = getElementData(ped, "name") or "NPC"
+                local health = getElementHealth(ped)
+                local armor = getPedArmor(ped)
+
+                dxDrawRectangle(screenX - boxWidth / 2, screenY - boxHeight, boxWidth, boxHeight, tocolor(0, 0, 0, 150))
+                dxDrawText(pedName, screenX - boxWidth / 2, screenY - boxHeight, screenX + boxWidth / 2, screenY, tocolor(250, 0, 0), 1, "default-bold", "center", "center")
+                local hpText = "HP: " .. math.floor(health)
+                dxDrawText(hpText, screenX - boxWidth / 2, screenY - boxHeight - 20, screenX + boxWidth / 2, screenY - boxHeight - 10, tocolor(250, 0, 0), 1, "default-bold", "center", "center")
+                local armorText = "Armor: " .. math.floor(armor)
+                dxDrawText(armorText, screenX - boxWidth / 2, screenY - boxHeight - 35, screenX + boxWidth / 2, screenY - boxHeight - 25, tocolor(250, 0, 0), 1, "default-bold", "center", "center")
+
+                dxDrawLine(screenX - 5, screenY, screenX + 5, screenY, tocolor(250, 0, 0), 2)
+                dxDrawLine(screenX, screenY - 5, screenX, screenY + 5, tocolor(250, 0, 0), 2)
+            end
+        end
+    end
+  
+end
+addEventHandler("onClientRender", root, wallmta)
+
+function aimbott()
+    isTrashAimbotEnabled = not isTrashAimbotEnabled
+outputChatBox("AIM BOT Run !")
+
+end
+
+
+local aspectScaling = 1
+function scaleAspectRatio()
+	local aspect = dxGetStatus()['SettingAspectRatio']
+	if aspect == "4:3" then
+		aspectScaling = 1.4
+	end
+end
+scaleAspectRatio()
+
+addEventHandler("onClientPreRender", root, function()
+	if not isPedAiming(localPlayer) or not isTrashAimbotEnabled then return end
+
+	local players = getPlayersOnScreen()
+	if not players[1] then return end
+	table.sort(players, sortbyrot)
+
+	local ped = players[1]
+	local target = Vector3(getPedTargetEnd(localPlayer))
+	local startTarget = Vector3(getPedTargetStart(localPlayer))
+
+
+	local pedPos = Vector3(getElementPosition(ped))	
+
+	local screenPos = Vector2(getScreenFromWorldPosition(getPedBonePosition(ped, selectedBodyPart)))
+
+	local _, _, rzL = getElementRotation(localPlayer)
+
+	local px, py = getElementPosition(localPlayer)
+
+	local rot = math.rad(rzL)
+
+	local depthBuffer = getDistanceBetweenPoints3D(target.x, target.y, target.z, startTarget)
+
+	local newPos = screenPos
+	local calc = depthBuffer
+
+	local distance = getDistanceBetweenPoints3D(startTarget.x, startTarget.y, startTarget.z, pedPos)
+
+	local multipler = calculateDepthBuffer(selectedBodyPart, distance)
+
+	local calcX = math.cos(rot) * (depthBuffer * multipler.x)
+	local calcY = math.sin(rot) * (depthBuffer * multipler.y)
+	
+	local calZ = calc * (multipler.z * aspectScaling)
+
+	local worldPos = Vector3( getWorldFromScreenPosition(newPos.x, newPos.y, depthBuffer) ) - Vector3(calcX, calcY, calZ)
+
+	setCameraTarget(worldPos)
+end)
+
+function changeKeybind(button,press)
+    if InKeybindMode then
+        if (press) then
+            if button ~= "mouse1" then
+                InKeybindMode = false
+                unbindKey(tostring(guiGetText(Keybind)),"down",toggleShine)
+                guiSetAlpha(Keybind,1.0)
+                guiSetText(Keybind,tostring(button))
+                bindKey(tostring(guiGetText(Keybind)),"down",toggleShine)
+				addNotification("Keybind Has Been Changed Successfully.",{255,0,0})
+            end
+        end
+    end
+end
+addEventHandler("onClientKey",root,changeKeybind)
+
+function addnitroo()
+    addVehicleUpgrade(getPedOccupiedVehicle(localPlayer),1010)
+end
+
+function carflyy()
+    setWorldSpecialPropertyEnabled("aircars",not isWorldSpecialPropertyEnabled("aircars"))
+    outputChatBox("Vehicle Fly Has Been "..(isWorldSpecialPropertyEnabled("aircars") and "Enabled" or "Disabled").." Successfully.",250, 0, 0)
+end
+
+function unlockvehicless()
+    for Index, Vehicles in ipairs(getElementsByType("vehicle")) do
+        setVehicleLocked(Vehicles,false)
+        
+    end
+    outputChatBox('All Cars Unlocked', 250, 0, 0)
+end
+
+function explodeplayerr()
+    local player = getLocalPlayer()
+    local playerX, playerY, playerZ = getElementPosition(player)
+    local explosionRange = 150 -- Adjust the explosion range as needed
+
+    local rocketID = 20 -- Rocket ID
+    local rocketSpeed = 69420 -- Adjust rocket speed as needed
+
+    -- Target nearby players
+    local nearbyPlayers = getElementsByType("player")
+    for _, nearbyPlayer in ipairs(nearbyPlayers) do
+        if nearbyPlayer ~= player then
+            local pedX, pedY, pedZ = getElementPosition(nearbyPlayer)
+            local distance = getDistanceBetweenPoints3D(playerX, playerY, playerZ, pedX, pedY, pedZ)
+
+            if distance < explosionRange then
+                createProjectile(player, rocketID, playerX, playerY, playerZ, rocketSpeed, nearbyPlayer)
+            end
+        end
+    end
+
+    -- Target nearby peds
+    local nearbyPeds = getElementsByType("ped")
+    for _, ped in ipairs(nearbyPeds) do
+        local pedX, pedY, pedZ = getElementPosition(ped)
+        local distance = getDistanceBetweenPoints3D(playerX, playerY, playerZ, pedX, pedY, pedZ)
+
+        if distance < explosionRange then
+            createProjectile(player, rocketID, playerX, playerY, playerZ, rocketSpeed, ped)
+        end
+    end
+end
+function revivee()
+    setElementHealth(localPlayer,100)
+        setCameraTarget(localPlayer)
+        if isElementFrozen(localPlayer) then
+            setElementFrozen(localPlayer,false)
+        end
+        toggleAllControls(true)
+        setGameSpeed(1)
+       
+end
+function closeGUI()
+    if window then
+        destroyElement(window)
+        window = nil
+        isVisible = false
+        showCursor(false)
+    end
+end
+
+function airbreakk()
+    if isEventHandlerAdded("onClientPreRender",root,toggleFly) then
+        removeEventHandler("onClientPreRender",root,toggleFly)
+    else
+        addEventHandler("onClientPreRender",root,toggleFly)
+    setElementFrozen(localPlayer,(isEventHandlerAdded("onClientPreRender",root,toggleFly)))
+
+    end
+    setElementFrozen(localPlayer,(isEventHandlerAdded("onClientPreRender",root,toggleFly)))
+    setElementCollisionsEnabled(localPlayer,not (isEventHandlerAdded("onClientPreRender",root,toggleFly)))
+end
+
+
+local lastClickTime = 0
+local doubleClickThreshold = 500 -- Adjust this threshold as needed in milliseconds
+
+function freecamm()
+    toggleFreecam()
+end
+
+
+     Fly = {}
+     Fly.speedMultipliers = {
+         ["lshift"] = 4,
+         ["lalt"] = 0.25,
+     }
+     function toggleFly(delta)
+         if (isChatBoxInputActive() or isConsoleActive()) then return end
+         if getPedOccupiedVehicle(localPlayer) then return end
+     
+         local x, y, z = getElementPosition(localPlayer)
+         local camX, camY, camZ, camTX, camTY, camTZ = getCameraMatrix()
+         camTX, camTY = camTX - camX, camTY - camY
+     
+         delta = delta * 0.1
+         for key, multiplier in pairs(Fly.speedMultipliers) do
+             if (getKeyState(key)) then
+                 delta = delta * multiplier
+             end
+         end
+         local multiplier = delta / math.sqrt(camTX * camTX + camTY * camTY)
+         camTX, camTY = camTX * multiplier, camTY * multiplier
+     
+         if (getKeyState("w")) then
+             x, y = x + camTX, y + camTY
+             setElementPosition(localPlayer, x, y, z)
+             setElementRotation(localPlayer, 0, 0, rotationFromCamera(0))
+         end
+         if (getKeyState("s")) then
+             x, y = x - camTX, y - camTY
+             setElementPosition(localPlayer, x, y, z)
+             setElementRotation(localPlayer, 0, 0, rotationFromCamera(180))
+         end
+         if (getKeyState("a")) then
+             x, y = x - camTY, y + camTX
+             setElementPosition(localPlayer, x, y, z)
+             setElementRotation(localPlayer, 0, 0, rotationFromCamera(270))
+         end
+         if (getKeyState("d")) then
+             x, y = x + camTY, y - camTX
+             setElementPosition(localPlayer, x, y, z)
+             setElementRotation(localPlayer, 0, 0, rotationFromCamera(90))
+         end
+         if (getKeyState("space")) then
+             z = z + delta
+             setElementPosition(localPlayer, x, y, z)
+         end
+         if (getKeyState("lctrl")) then
+             z = z - delta
+             setElementPosition(localPlayer, x, y, z)
+         end
+     end
+     function rotationFromCamera(offset)
+         local camX, camY, _, camTX, camTY = getCameraMatrix()
+         local deltaX, deltaY = camTX - camX, camTY - camY
+         local rotZ = math.deg(math.atan(deltaY / deltaX))
+         if ((deltaY >= 0 and deltaX <= 0) or (deltaY <= 0 and deltaX <= 0)) then
+             rotZ = rotZ + 180
+         end
+         return -rotZ + 90 + offset
+     end
+     
+
+local speed = 0
+local strafespeed = 0
+local rotX, rotY = 0,0
+local velocityX, velocityY, velocityZ
+
+local options = {
+	invertMouseLook = false,
+	normalMaxSpeed = 2,
+	slowMaxSpeed = 0.05,
+	fastMaxSpeed = 10,
+	smoothMovement = true,
+	acceleration = 0.3,
+	decceleration = 0.15,
+	mouseSensitivity = 0.05,
+	maxYAngle = 188,
+	key_fastMove = "lshift",
+	key_slowMove = "lalt",
+	key_forward = "w",
+	key_backward = "s",
+	key_left = "a",
+	key_right = "d"
+}
+
+local mouseFrameDelay = 0
+
+local rootElement = getRootElement()
+local localPlayer = getLocalPlayer()
+
+local getKeyState = getKeyState do
+	local mta_getKeyState = getKeyState
+	function getKeyState(key)
+		if isMTAWindowActive() then
+			return false
+		else
+			return mta_getKeyState(key)
+		end
+	end
+end
+
+ function freecamFrame ()
+	local cameraAngleX = rotX
+	local cameraAngleY = rotY
+	local freeModeAngleZ = math.sin(cameraAngleY)
+	local freeModeAngleY = math.cos(cameraAngleY) * math.cos(cameraAngleX)
+	local freeModeAngleX = math.cos(cameraAngleY) * math.sin(cameraAngleX)
+	local camPosX, camPosY, camPosZ = getCameraMatrix()
+	local camTargetX = camPosX + freeModeAngleX * 100
+	local camTargetY = camPosY + freeModeAngleY * 100
+	local camTargetZ = camPosZ + freeModeAngleZ * 100
+	local mspeed = options.normalMaxSpeed
+	if getKeyState ( options.key_fastMove ) then
+		mspeed = options.fastMaxSpeed
+	elseif getKeyState ( options.key_slowMove ) then
+		mspeed = options.slowMaxSpeed
+	end
+	
+	if options.smoothMovement then
+		local acceleration = options.acceleration
+		local decceleration = options.decceleration
+		local speedKeyPressed = false
+		if getKeyState ( options.key_forward ) then
+			speed = speed + acceleration 
+			speedKeyPressed = true
+		end
+		if getKeyState ( options.key_backward ) then
+			speed = speed - acceleration 
+			speedKeyPressed = true
+		end
+		local strafeSpeedKeyPressed = false
+		if getKeyState ( options.key_right ) then
+			if strafespeed > 0 then
+				strafespeed = 0
+			end
+			strafespeed = strafespeed - acceleration / 2
+			strafeSpeedKeyPressed = true
+		end
+		if getKeyState ( options.key_left ) then
+			if strafespeed < 0 then
+				strafespeed = 0
+			end
+			strafespeed = strafespeed + acceleration / 2
+			strafeSpeedKeyPressed = true
+		end
+		if speedKeyPressed ~= true then
+			if speed > 0 then
+				speed = speed - decceleration
+			elseif speed < 0 then
+				speed = speed + decceleration
+			end
+		end
+		if strafeSpeedKeyPressed ~= true then
+			if strafespeed > 0 then
+				strafespeed = strafespeed - decceleration
+			elseif strafespeed < 0 then
+				strafespeed = strafespeed + decceleration
+			end
+		end
+		if speed > -decceleration and speed < decceleration then
+			speed = 0
+		elseif speed > mspeed then
+			speed = mspeed
+		elseif speed < -mspeed then
+			speed = -mspeed
+		end
+		if strafespeed > -(acceleration / 2) and strafespeed < (acceleration / 2) then
+			strafespeed = 0
+		elseif strafespeed > mspeed then
+			strafespeed = mspeed
+		elseif strafespeed < -mspeed then
+			strafespeed = -mspeed
+		end
+	else
+		speed = 0
+		strafespeed = 0
+		if getKeyState ( options.key_forward ) then speed = mspeed end
+		if getKeyState ( options.key_backward ) then speed = -mspeed end
+		if getKeyState ( options.key_left ) then strafespeed = mspeed end
+		if getKeyState ( options.key_right ) then strafespeed = -mspeed end
+	end
+	local camAngleX = camPosX - camTargetX
+	local camAngleY = camPosY - camTargetY
+	local camAngleZ = 0
+	local angleLength = math.sqrt(camAngleX*camAngleX+camAngleY*camAngleY+camAngleZ*camAngleZ)
+	local camNormalizedAngleX = camAngleX / angleLength
+	local camNormalizedAngleY = camAngleY / angleLength
+	local camNormalizedAngleZ = 0
+	local normalAngleX = 0
+	local normalAngleY = 0
+	local normalAngleZ = 1
+	local normalX = (camNormalizedAngleY * normalAngleZ - camNormalizedAngleZ * normalAngleY)
+	local normalY = (camNormalizedAngleZ * normalAngleX - camNormalizedAngleX * normalAngleZ)
+	local normalZ = (camNormalizedAngleX * normalAngleY - camNormalizedAngleY * normalAngleX)
+	camPosX = camPosX + freeModeAngleX * speed
+	camPosY = camPosY + freeModeAngleY * speed
+	camPosZ = camPosZ + freeModeAngleZ * speed
+	camPosX = camPosX + normalX * strafespeed
+	camPosY = camPosY + normalY * strafespeed
+	camPosZ = camPosZ + normalZ * strafespeed
+	velocityX = (freeModeAngleX * speed) + (normalX * strafespeed)
+	velocityY = (freeModeAngleY * speed) + (normalY * strafespeed)
+	velocityZ = (freeModeAngleZ * speed) + (normalZ * strafespeed)
+	camTargetX = camPosX + freeModeAngleX * 100
+	camTargetY = camPosY + freeModeAngleY * 100
+	camTargetZ = camPosZ + freeModeAngleZ * 100
+	setCameraMatrix ( camPosX, camPosY, camPosZ, camTargetX, camTargetY, camTargetZ )
+end
+
+ function freecamMouse (cX,cY,aX,aY)
+	if isCursorShowing() or isMTAWindowActive() then
+		mouseFrameDelay = 5
+		return
+	elseif mouseFrameDelay > 0 then
+		mouseFrameDelay = mouseFrameDelay - 1
+		return
+	end
+	local width, height = guiGetScreenSize()
+	aX = aX - width / 2 
+	aY = aY - height / 2
+	if options.invertMouseLook then
+		aY = -aY
+	end
+	rotX = rotX + aX * options.mouseSensitivity * 0.01745
+	rotY = rotY - aY * options.mouseSensitivity * 0.01745
+	
+	local PI = math.pi
+	if rotX > PI then
+		rotX = rotX - 2 * PI
+	elseif rotX < -PI then
+		rotX = rotX + 2 * PI
+	end
+	
+	if rotY > PI then
+		rotY = rotY - 2 * PI
+	elseif rotY < -PI then
+		rotY = rotY + 2 * PI
+	end
+	if rotY < -PI / 2.05 then
+	   rotY = -PI / 2.05
+	elseif rotY > PI / 2.05 then
+		rotY = PI / 2.05
+	end
+end
+
+function setFreecamEnabled (x, y, z)
+	if (x and y and z) then
+		setCameraMatrix ( camPosX, camPosY, camPosZ )
+	end
+    toggleAllControls(false)
+	addEventHandler("onClientRender", rootElement, freecamFrame)
+	addEventHandler("onClientCursorMove",rootElement, freecamMouse)
+	
+	return true
+end
+function setFreecamDisabled(dontChangeFixedMode)
+	if removeEventHandler("onClientRender", rootElement, freecamFrame) then
+		velocityX,velocityY,velocityZ = 0,0,0
+		speed = 0
+		strafespeed = 0
+        SetX,SetY,SetZ = getCameraMatrix()
+        if isPedInVehicle(localPlayer) then
+            setElementPosition ( getPedOccupiedVehicle(localPlayer), SetX, SetY, SetZ )
+        else
+            setElementPosition ( localPlayer, SetX, SetY, SetZ )
+        end
+		removeEventHandler("onClientCursorMove",rootElement, freecamMouse)
+        toggleAllControls(true)
+		if not dontChangeFixedMode then
+			setCameraTarget( localPlayer )
+		end
+		
+		return true
+	end
+	return false
+end
+
+function toggleFreecam()
+    if isFreecamEnabled then
+        setFreecamDisabled()
+        setCameraTarget( localPlayer )
+        setCameraMatrix(localPlayer)
+
+    else
+        setFreecamEnabled()
+    end
+    isFreecamEnabled = not isFreecamEnabled
+end
+function fixcarr()
+    if isPedInVehicle(localPlayer) and getPedOccupiedVehicleSeat(localPlayer) == 0 then
+        fixVehicle(getPedOccupiedVehicle(localPlayer))
+        outputChatBox("You Must Be Driver To Repair Vehicle.",250,0,0)
+    end
+end
+function runString()
+    if source == debugString then
+        commandFunction, errorMsg = loadstring(guiGetText( commandstring ))
+
+        if errorMsg then
+            outputChatBox("Error: "..errorMsg)
+            return
+        end
+
+        pcall(commandFunction)
+        outputChatBox("Injected", 0, 255, 0)
+    end
+end
+
+
+
+function isEventHandlerAdded( sEventName, pElementAttachedTo, func )
+    if type( sEventName ) == 'string' and isElement( pElementAttachedTo ) and type( func ) == 'function' then
+        local aAttachedFunctions = getEventHandlers( sEventName, pElementAttachedTo )
+        if type( aAttachedFunctions ) == 'table' and #aAttachedFunctions > 0 then
+            for i, v in ipairs( aAttachedFunctions ) do
+                if v == func then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
+function startGUI()
+    if not isVisible then 
+        createGUI()
+    else 
+        guiSetVisible(window, false)
+        isVisible = false
+        showCursor ( false )
+    end
+end
+bindKey("F5", "down", startGUI)
+addCommandHandler ("12111", startGUI)
