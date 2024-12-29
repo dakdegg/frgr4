@@ -1,0 +1,932 @@
+local screenWidth, screenHeight = guiGetScreenSize()
+local windowWidth, windowHeight = 550, 400
+local windowX, windowY = (screenWidth - windowWidth) / 2, (screenHeight - windowHeight) / 2
+
+local menuVisible = false
+local currentPage = "Visual"
+local isDragging = false
+local dragOffsetX, dragOffsetY = 0, 0
+local showMessage = false
+local messageTimer
+local targetPlayerName = ""
+local lastCharacter = nil
+local airbreakSpeed = 0.5
+local airbreakBoostSpeed = 2.0
+local isContextMenuVisible = false
+local contextMenuX, contextMenuY = 0, 0
+local selectedObject = nil
+local lastBlockedState = {}  
+local blockedObjects = {}
+local isSpectating = false
+local targetResource = nil
+isVisible = false
+
+
+local boneMapping = {
+    {0, 4},  -- Spine1 to Upper Torso
+    {4, 5},  -- Upper Torso to Neck
+    {5, 6},  -- Neck to Head2
+    {6, 7},  -- Head2 to Head1
+    {7, 8},  -- Head1 to Head
+
+   
+    {4, 21}, -- Upper Torso to Right Upper Torso
+    {21, 22}, -- Right Upper Torso to Right Shoulder
+    {22, 23}, -- Right Shoulder to Right Elbow
+    {23, 24}, -- Right Elbow to Right Wrist
+    {24, 25}, -- Right Wrist to Right Hand
+    {25, 26}, -- Right Hand to Right Thumb
+
+    
+    {4, 31}, -- Upper Torso to Left Upper Torso
+    {31, 32}, -- Left Upper Torso to Left Shoulder
+    {32, 33}, -- Left Shoulder to Left Elbow
+    {33, 34}, -- Left Elbow to Left Wrist
+    {34, 35}, -- Left Wrist to Left Hand
+    {35, 36}, -- Left Hand to Left Thumb
+
+    
+    {0, 52}, -- Right Hip to Right Knee
+    {52, 53}, -- Right Knee to Right Ankle
+    {53, 54}, -- Right Ankle to Right Foot
+
+    
+    {0, 42}, -- Left Hip to Left Knee
+    {42, 43}, -- Left Knee to Left Ankle
+    {43, 44}, -- Left Ankle to Left Foot
+}
+
+local pages = {
+    Visual = {
+        {"Enable ESP", "enableESP"},
+        {"Show on Yourself", "yourself"},
+        {"Show on NPCs", "showOnNPCs"},
+        {"Head", "head"},
+        {"Skeleton", "skeleton"},
+        {"Name", "name"},
+        {"Health", "health"},
+        {"Distance", "distance"}
+    },
+     Vehicles = {
+        {"Enable ESP", "vehicleEnableESP"},
+        {"Model", "vehicleModel"},
+        {"Name", "vehicleName"},
+        {"Distance", "vehicleDistance"},
+        {"Toggle Vehicle", "toggleVehicle"},  
+        {"Vehicle GodMode", "vehicleGodMode"},  
+        {"Teleport All Vehicles", "teleportAllVehicles"},
+        {"Repair Vehicle", "repairVehicle"},
+        {"Super Speed", "superSpeed"},
+        {"Explode Nearby Vehicles", "explodeNearbyVehicles"},
+        {"Super Brake", "superBrake"}
+    },
+    Weapons = {
+        {"Show Nearby Weapons", "weaponESP"},
+        {"Show Player Weapon", "showPlayerWeapon"}
+    },
+    Misc = {
+        {"Fast Flip", "fastFlip"},
+        {"Teleport to City 1", "city1"},
+        {"Teleport to City 2", "city2"},
+        {"Teleport to City 3", "city3"},
+        {"Moon Walk", "moonWalk"},
+        {"Airbreak", "airbreak"},
+        {"coolFov", "zoomScope"}
+    },
+    Player = {
+        {"Player GodMode", "playerGodMode"}
+},
+    Objects = {
+        {"Show & Block Objects", "showNearbyObjects"}
+},
+}
+
+local checkboxStates = {
+    enableESP = false,
+    vehicleEnableESP = false,
+    vehicleModel = false,
+    vehicleName = false,
+    vehicleDistance = false,
+    yourself = false,
+    showOnNPCs = false,
+    head = false,
+    skeleton = false,
+    name = false,
+    health = false,
+    distance = false,
+    fastFlip = false,
+    weaponESP = false,
+    showPlayerWeapon = false,  
+    playerGodMode = false,
+    superSpeed = false,
+    superBrake = false,
+    moonWalk = false,
+    airbreak = false,
+    zoomScope = false,
+    showNearbyObjects = false
+}
+
+local targetPlayerName = "" 
+
+function drawMenu()
+    if menuVisible then
+        dxDrawRectangle(windowX, windowY, windowWidth, windowHeight, tocolor(0, 0, 0, 200))
+        dxDrawRectangle(windowX, windowY, windowWidth, 30, tocolor(20, 20, 20, 255))
+        dxDrawText("Dhn Menu V2", windowX, windowY, windowX + windowWidth, windowY + 30, tocolor(255, 255, 255), 1.2, "default-bold", "center", "center")
+
+        local tabs = {"Visual", "Vehicles", "Weapons", "Misc", "Player", "Objects"}
+        local margin = 5
+        for i, tab in ipairs(tabs) do
+            local tabX = windowX + (i - 1) * (windowWidth / #tabs)
+            local tabWidth = windowWidth / #tabs
+            local tabColor = tocolor(200, 200, 200)
+            if tab == currentPage then
+                tabColor = tocolor(255, 255, 255)
+            end
+            dxDrawRectangle(tabX + margin, windowY + 30 + margin, tabWidth - 2 * margin, 30 - margin, tocolor(100, 100, 100, 150))
+            dxDrawText(tab, tabX, windowY + 30, tabX + tabWidth, windowY + 60, tabColor, 1, "default-bold", "center", "center")
+        end
+
+        local options = pages[currentPage]
+        local yOffset = 70
+        local checkboxHeight = 20
+        for i, option in ipairs(options) do
+            local text, key = option[1], option[2]
+            dxDrawText(text, windowX + 10, windowY + yOffset, windowX + windowWidth - 10, windowY + yOffset + checkboxHeight, tocolor(255, 255, 255), 1, "default", "left", "center")
+
+           if key == "toggleVehicle" then
+                dxDrawRectangle(windowX + windowWidth - 90, windowY + yOffset, 80, 20, tocolor(30,144,255))
+                dxDrawText("Toggle", windowX + windowWidth - 90, windowY + yOffset, windowX + windowWidth - 10, windowY + yOffset + 20, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+            elseif key == "vehicleGodMode" then
+                dxDrawRectangle(windowX + windowWidth - 90, windowY + yOffset, 80, 20, tocolor(30,144,255))
+                dxDrawText("GodMode", windowX + windowWidth - 90, windowY + yOffset, windowX + windowWidth - 10, windowY + yOffset + 20, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+            elseif key == "teleportAllVehicles" then
+                dxDrawRectangle(windowX + windowWidth - 90, windowY + yOffset, 80, 20, tocolor(255,69,0))
+                dxDrawText("Teleport", windowX + windowWidth - 90, windowY + yOffset, windowX + windowWidth - 10, windowY + yOffset + 20, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+            elseif key == "repairVehicle" then
+                dxDrawRectangle(windowX + windowWidth - 90, windowY + yOffset, 80, 20, tocolor(50, 205, 50))
+                dxDrawText("Repair", windowX + windowWidth - 90, windowY + yOffset, windowX + windowWidth - 10, windowY + yOffset + 20, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+            elseif key == "explodeNearbyVehicles" then
+                dxDrawRectangle(windowX + windowWidth - 90, windowY + yOffset, 80, 20, tocolor(255, 69, 0))
+                dxDrawText("Explode", windowX + windowWidth - 90, windowY + yOffset, windowX + windowWidth - 10, windowY + yOffset + 20, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+            else
+                if checkboxStates[key] then
+                    dxDrawRectangle(windowX + windowWidth - 30, windowY + yOffset, 20, 20, tocolor(0, 255, 0))
+                else
+                    dxDrawRectangle(windowX + windowWidth - 30, windowY + yOffset, 20, 20, tocolor(255, 0, 0))
+                end
+            end
+
+            yOffset = yOffset + checkboxHeight + 5
+        end
+
+        
+        if currentPage == "Player" then
+            dxDrawText("Enter Player Name:", windowX + 10, windowY + yOffset + 20, windowX + windowWidth - 10, windowY + yOffset + 40, tocolor(255, 255, 255), 1, "default", "left", "center")
+            dxDrawRectangle(windowX + 10, windowY + yOffset + 50, 150, 25, tocolor(50, 50, 50, 255))
+            dxDrawText(targetPlayerName, windowX + 15, windowY + yOffset + 50, windowX + 150, windowY + yOffset + 75, tocolor(255, 255, 255), 1, "default", "left", "center")
+            
+            -- زر Go
+            dxDrawRectangle(windowX + 180, windowY + yOffset + 50, 80, 25, tocolor(30,144,255))
+            dxDrawText("Go", windowX + 180, windowY + yOffset + 50, windowX + 260, windowY + yOffset + 75, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+            
+            -- زر Spectate
+            dxDrawRectangle(windowX + 270, windowY + yOffset + 50, 80, 25, tocolor(255,140,0))
+            dxDrawText("Spectate", windowX + 270, windowY + yOffset + 50, windowX + 350, windowY + yOffset + 75, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+        end
+
+        dxDrawText("Dhn Discord", windowX, windowY + windowHeight - 20, windowX + windowWidth, windowY + windowHeight, tocolor(0, 150, 255), 1, "default-bold", "center", "center")
+
+        if showMessage then
+            dxDrawText("Discord link copied!", windowX, windowY + windowHeight - 40, windowX + windowWidth, windowY + windowHeight - 20, tocolor(0, 150, 255), 1, "default-bold", "center", "center")
+        end
+    end
+end
+addEventHandler("onClientRender", root, drawMenu)
+
+function spectatePlayer()
+    if isSpectating then
+
+        setCameraTarget(localPlayer)
+        outputChatBox("Stopped spectating.", 255, 0, 0)
+        isSpectating = false
+    else
+
+        local foundPlayer = nil
+        for _, player in ipairs(getElementsByType("player")) do
+            if getPlayerName(player) == targetPlayerName then
+                foundPlayer = player
+                break
+            end
+        end
+        if foundPlayer then
+            setCameraTarget(foundPlayer)
+            outputChatBox("Now spectating " .. targetPlayerName, 0, 255, 0)
+            isSpectating = true
+        else
+            outputChatBox("Player not found", 255, 0, 0)
+        end
+    end
+end
+
+addEventHandler("onClientCharacter", root, function(character)
+    if currentPage == "Player" then
+        if character ~= lastCharacter then  
+            targetPlayerName = targetPlayerName .. character
+            lastCharacter = character  
+        end
+    end
+end)
+
+
+function goToPlayer()
+    local foundPlayer = nil
+    for _, player in ipairs(getElementsByType("player")) do
+        if getPlayerName(player) == targetPlayerName then
+            foundPlayer = player
+            break
+        end
+    end
+    if foundPlayer then
+        local px, py, pz = getElementPosition(foundPlayer)
+        setElementPosition(localPlayer, px, py, pz + 1) 
+        outputChatBox("Teleported to " .. targetPlayerName, 0, 255, 0)
+    else
+        outputChatBox("Player not found", 255, 0, 0)
+    end
+end
+
+
+function onClientClick(button, state, absoluteX, absoluteY)
+    if menuVisible and button == "left" and currentPage == "Player" then
+        if state == "down" and absoluteX > windowX + 180 and absoluteX < windowX + 260 and absoluteY > windowY + yOffset + 50 and absoluteY < windowY + yOffset + 75 then
+            goToPlayer() 
+        end
+    end
+end
+addEventHandler("onClientClick", root, onClientClick)
+
+function onClientClick(button, state, absoluteX, absoluteY)
+    if menuVisible and button == "left" then
+        if state == "down" then
+           
+            if absoluteX > windowX and absoluteX < windowX + windowWidth and absoluteY > windowY and absoluteY < windowY + 30 then
+                isDragging = true
+                dragOffsetX, dragOffsetY = absoluteX - windowX, absoluteY - windowY
+                return
+            end
+            
+            local tabs = {"Visual", "Vehicles", "Weapons", "Misc", "Player", "Objects"}
+            for i, tab in ipairs(tabs) do
+                local tabX = windowX + (i - 1) * (windowWidth / #tabs)
+                if absoluteX > tabX and absoluteX < tabX + windowWidth / #tabs and absoluteY > windowY + 30 and absoluteY < windowY + 60 then
+                    currentPage = tab
+                    return
+                end
+            end
+
+            local options = pages[currentPage]
+            local yOffset = 70
+            local checkboxHeight = 20
+            for i, option in ipairs(options) do
+                local key = option[2]
+                
+                if currentPage == "Misc" and (key == "city1" or key == "city2" or key == "city3") then
+                    if absoluteX > windowX + windowWidth - 90 and absoluteX < windowX + windowWidth - 10 and absoluteY > windowY + yOffset and absoluteY < windowY + yOffset + checkboxHeight then
+                        teleportToLocation(key)
+                        return
+                    end
+                end
+                
+                if key == "toggleVehicle" then
+                    if absoluteX > windowX + windowWidth - 90 and absoluteX < windowX + windowWidth - 10 and absoluteY > windowY + yOffset and absoluteY < windowY + yOffset + checkboxHeight then
+                        toggleVehicle()
+                        return
+                    end
+                elseif key == "vehicleGodMode" then
+                    if absoluteX > windowX + windowWidth - 90 and absoluteX < windowX + windowWidth - 10 and absoluteY > windowY + yOffset and absoluteY < windowY + yOffset + checkboxHeight then
+                        checkboxStates["vehicleGodMode"] = not checkboxStates["vehicleGodMode"]
+                        return
+                    end
+                elseif key == "teleportAllVehicles" then
+                    if absoluteX > windowX + windowWidth - 90 and absoluteX < windowX + windowWidth - 10 and absoluteY > windowY + yOffset and absoluteY < windowY + yOffset + checkboxHeight then
+                        warpAllVehiclesToPlayer()
+                        return
+                    end
+                elseif key == "repairVehicle" then
+                    if absoluteX > windowX + windowWidth - 90 and absoluteX < windowX + windowWidth - 10 and absoluteY > windowY + yOffset and absoluteY < windowY + yOffset + checkboxHeight then
+                        repairCurrentVehicle()
+                        return
+                    end
+                elseif key == "explodeNearbyVehicles" then
+                    if absoluteX > windowX + windowWidth - 90 and absoluteX < windowX + windowWidth - 10 and absoluteY > windowY + yOffset and absoluteY < windowY + yOffset + checkboxHeight then
+                        explodeNearbyVehicles()
+                        return
+                    end
+                else
+                    if absoluteX > windowX + windowWidth - 30 and absoluteX < windowX + windowWidth - 10 and absoluteY > windowY + yOffset and absoluteY < windowY + yOffset + checkboxHeight then
+                        checkboxStates[key] = not checkboxStates[key]
+                        return
+                    end
+                end
+
+                yOffset = yOffset + checkboxHeight + 5
+            end
+            
+            if currentPage == "Player" then
+                local goYOffset = yOffset + 50
+                
+                if absoluteX > windowX + 180 and absoluteX < windowX + 260 and absoluteY > windowY + goYOffset and absoluteY < windowY + goYOffset + 25 then
+                    goToPlayer()
+                    return
+                end
+                
+                if absoluteX > windowX + 270 and absoluteX < windowX + 350 and absoluteY > windowY + goYOffset and absoluteY < windowY + goYOffset + 25 then
+                    spectatePlayer()
+                    return
+                end
+            end
+
+            
+            if absoluteX > windowX and absoluteX < windowX + windowWidth and absoluteY > windowY + windowHeight - 20 and absoluteY < windowY + windowHeight then
+                showMessage = true
+                setClipboard("https://discord.gg/dhn")
+                if isTimer(messageTimer) then
+                    killTimer(messageTimer)
+                end
+                messageTimer = setTimer(function()
+                    showMessage = false
+                end, 3000, 1)
+            end
+        elseif state == "up" then
+            isDragging = false
+        end
+    end
+end
+addEventHandler("onClientClick", root, onClientClick)
+
+
+function toggleVehicle()
+    if isPlayerInVehicle(localPlayer) then
+        local vehicle = getPedOccupiedVehicle(localPlayer)
+        if vehicle then
+            local engineState = getVehicleEngineState(vehicle)
+            setVehicleEngineState(vehicle, not engineState)
+        end
+    else
+        local vehicle = getNearestVehicle()
+        if vehicle then
+            warpPedIntoVehicle(localPlayer, vehicle)
+            setVehicleEngineState(vehicle, true)
+        end
+    end
+end
+
+function onRightClickShowContextMenu(button, state, absoluteX, absoluteY, _, _, _, clickedElement)
+    if button == "right" and state == "down" then
+        if clickedElement and getElementType(clickedElement) == "object" then
+            selectedObject = clickedElement
+            contextMenuX, contextMenuY = absoluteX, absoluteY
+            isContextMenuVisible = true
+        else
+            isContextMenuVisible = false
+            selectedObject = nil
+        end
+    end
+end
+addEventHandler("onClientClick", root, onRightClickShowContextMenu)
+
+-- رسم القائمة السياقية
+function drawContextMenu()
+    if isContextMenuVisible and selectedObject then
+        local isBlocked = blockedObjects[selectedObject] == true
+        local buttonText = isBlocked and "Unblock" or "Block"
+        dxDrawRectangle(contextMenuX, contextMenuY, 100, 30, tocolor(50, 50, 50, 200))
+        dxDrawText(buttonText, contextMenuX + 10, contextMenuY + 5, contextMenuX + 90, contextMenuY + 25, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+    end
+end
+addEventHandler("onClientRender", root, drawContextMenu)
+
+function onClickContextMenu(button, state, absoluteX, absoluteY)
+    if button == "left" and state == "down" and isContextMenuVisible and selectedObject then
+        if absoluteX >= contextMenuX and absoluteX <= contextMenuX + 100 and absoluteY >= contextMenuY and absoluteY <= contextMenuY + 30 then
+            local isBlocked = blockedObjects[selectedObject] == true
+            if isBlocked then
+               
+                setElementAlpha(selectedObject, 255)
+                setElementCollisionsEnabled(selectedObject, true)
+                blockedObjects[selectedObject] = nil 
+            else
+                
+                setElementAlpha(selectedObject, 0)
+                setElementCollisionsEnabled(selectedObject, false)
+                blockedObjects[selectedObject] = true 
+            end
+
+          
+            isContextMenuVisible = false
+            selectedObject = nil
+        end
+    end
+end
+addEventHandler("onClientClick", root, onClickContextMenu)
+
+addEventHandler("onClientRender", root, function()
+    if checkboxStates["showNearbyObjects"] then
+        drawNearbyObjects()
+    end
+end)
+
+function getElementSpeed(element)
+    local vx, vy, vz = getElementVelocity(element)
+    return math.sqrt(vx^2 + vy^2 + vz^2) * 180 
+end
+
+function applyZoomScope()
+    local playerVehicle = getPedOccupiedVehicle(localPlayer)
+    
+    if checkboxStates["zoomScope"] then
+        if playerVehicle then
+           
+            if getElementSpeed(playerVehicle) > 0 then
+                setCameraFieldOfView("vehicle", 110)
+            else
+                setCameraFieldOfView("vehicle", 70) 
+            end
+        else
+            
+            setCameraFieldOfView("player", 110)
+        end
+    else
+        
+        setCameraFieldOfView("player", 70)
+        setCameraFieldOfView("vehicle", 70)
+    end
+end
+
+addEventHandler("onClientRender", root, applyZoomScope)
+
+function applyAirbreak()
+    if checkboxStates["airbreak"] then
+        
+        local camX, camY, camZ, targetX, targetY, targetZ = getCameraMatrix()
+        local x, y, z = getElementPosition(localPlayer)
+        local speed = airbreakSpeed
+
+        
+        if getKeyState("lshift") or getKeyState("rshift") then
+            speed = airbreakBoostSpeed
+        end
+
+        
+        local dirX = targetX - camX
+        local dirY = targetY - camY
+        local dirZ = targetZ - camZ
+
+        
+        local magnitude = math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ)
+        dirX = dirX / magnitude
+        dirY = dirY / magnitude
+        dirZ = dirZ / magnitude
+
+       
+        if getKeyState("w") then
+            x = x + dirX * speed
+            y = y + dirY * speed
+            z = z + dirZ * speed
+        end
+        if getKeyState("s") then
+            x = x - dirX * speed
+            y = y - dirY * speed
+            z = z - dirZ * speed
+        end
+        if getKeyState("a") then
+            x = x - dirY * speed
+            y = y + dirX * speed
+        end
+        if getKeyState("d") then
+            x = x + dirY * speed
+            y = y - dirX * speed
+        end
+        if getKeyState("space") then
+            z = z + speed
+        end
+        if getKeyState("lctrl") then
+            z = z - speed
+        end
+
+       
+        setElementPosition(localPlayer, x, y, z)
+    end
+end
+
+addEventHandler("onClientRender", root, applyAirbreak)
+
+function applyMoonWalk()
+    if checkboxStates["moonWalk"] then
+        
+        setPedWalkingStyle(localPlayer, 138) 
+
+     
+        if getControlState("forwards") and isPedOnGround(localPlayer) then
+            local x, y, z = getElementVelocity(localPlayer)
+            
+            setElementVelocity(localPlayer, x * 2.0, y * 2.0, z)
+        end
+    else
+        
+        setPedWalkingStyle(localPlayer, 0) 
+    end
+end
+
+addEventHandler("onClientRender", root, applyMoonWalk)
+
+function teleportToLocation(location)
+    local positions = {
+        city1 = {x = 2495.0, y = -1686.0, z = 13.5}, 
+        city2 = {x = 2000.4, y = 152.6, z = 27.6}, 
+        city3 = {x = 2040.7, y = 1596.9, z = 10.6}  
+    }
+    local pos = positions[location]
+    if pos then
+        setElementPosition(localPlayer, pos.x, pos.y, pos.z)
+        outputChatBox("Teleported to " .. location, 0, 255, 0)
+    end
+end
+
+function explodeNearbyVehicles()
+    local px, py, pz = getElementPosition(localPlayer)
+    local explosionRange = 200  
+
+    for _, vehicle in ipairs(getElementsByType("vehicle")) do
+        local vx, vy, vz = getElementPosition(vehicle)
+        local distance = getDistanceBetweenPoints3D(px, py, pz, vx, vy, vz)
+
+        if distance <= explosionRange then
+            blowVehicle(vehicle) 
+        end
+    end
+
+    outputChatBox("Nearby vehicles have been exploded!", 255, 0, 0)
+end
+
+addEventHandler("onClientCharacter", root, function(character)
+    if menuVisible and currentPage == "Player" then 
+        if character ~= lastCharacter then  
+            targetPlayerName = targetPlayerName .. character
+            lastCharacter = character  
+        end
+    end
+end)
+
+addEventHandler("onClientGUIClose", root, function()
+    if not menuVisible then
+        targetPlayerName = ""  
+        lastCharacter = nil    
+    end
+end)
+
+function drawNearbyObjects()
+    local px, py, pz = getElementPosition(localPlayer)
+    for _, object in ipairs(getElementsByType("object")) do
+        local ox, oy, oz = getElementPosition(object)
+        local distance = getDistanceBetweenPoints3D(px, py, pz, ox, oy, oz)
+
+        
+        if distance <= 30 then
+            local sx, sy = getScreenFromWorldPosition(ox, oy, oz)
+            if sx and sy then
+                local objectID = getElementModel(object)
+                dxDrawText("ID: " .. objectID, sx, sy, sx, sy, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+            end
+        end
+    end
+end
+
+function goToPlayer()
+    local foundPlayer = nil
+    for _, player in ipairs(getElementsByType("player")) do
+        if getPlayerName(player) == targetPlayerName then
+            foundPlayer = player
+            break
+        end
+    end
+    if foundPlayer then
+        local px, py, pz = getElementPosition(foundPlayer)
+        setElementPosition(localPlayer, px, py, pz + 1)
+        outputChatBox("Teleported to " .. targetPlayerName, 0, 255, 0)
+    else
+        outputChatBox("Player not found", 255, 0, 0)
+    end
+end
+
+
+function applyVehicleEnhancements()
+    local vehicle = getPedOccupiedVehicle(localPlayer)
+    
+    
+    if vehicle then
+        
+        if checkboxStates["superSpeed"] then
+            setVehicleHandling(vehicle, "maxVelocity", 1000)             
+            setVehicleHandling(vehicle, "engineAcceleration", 50)        
+            setVehicleHandling(vehicle, "engineInertia", 10)           
+            setVehicleHandling(vehicle, "tractionMultiplier", 1.2)      
+            setVehicleHandling(vehicle, "driveType", "awd")             
+        else
+           
+            resetVehicleHandling(vehicle, "maxVelocity")
+            resetVehicleHandling(vehicle, "engineAcceleration")
+            resetVehicleHandling(vehicle, "engineInertia")
+            resetVehicleHandling(vehicle, "tractionMultiplier")
+            resetVehicleHandling(vehicle, "driveType")
+        end
+
+        
+        if checkboxStates["superBrake"] then
+            if getKeyState("s") or getKeyState("space") then
+                setVehicleHandling(vehicle, "brakeDeceleration", 500)  
+                setVehicleHandling(vehicle, "brakeBias", 1.0)         
+            else
+                
+                resetVehicleHandling(vehicle, "brakeDeceleration")
+                resetVehicleHandling(vehicle, "brakeBias")
+            end
+        else
+            
+            resetVehicleHandling(vehicle, "brakeDeceleration")
+            resetVehicleHandling(vehicle, "brakeBias")
+        end
+    end
+end
+
+addEventHandler("onClientRender", root, applyVehicleEnhancements)
+
+
+function repairCurrentVehicle()
+    local vehicle = getPedOccupiedVehicle(localPlayer)
+    if vehicle then
+        fixVehicle(vehicle)
+        outputChatBox("Vehicle repaired!", 0, 255, 0)
+    else
+        outputChatBox("You are not in a vehicle!", 255, 0, 0)
+    end
+end
+
+function warpAllVehiclesToPlayer()
+    local px, py, pz = getElementPosition(localPlayer)
+    for _, vehicle in ipairs(getElementsByType("vehicle")) do
+        setElementPosition(vehicle, px + math.random(-5, 5), py + math.random(-5, 5), pz)
+    end
+end
+
+addEventHandler("onClientRender", root, function()
+    if checkboxStates["playerGodMode"] then
+        local health = getElementHealth(localPlayer)
+        local armor = getPedArmor(localPlayer)
+
+        
+        if health < 100 then
+            setElementHealth(localPlayer, 100)
+        end
+
+        
+        if armor < 200 then
+            setPedArmor(localPlayer, 200)
+        end
+    end
+end)
+
+addEventHandler("onClientRender", root, function()
+    if checkboxStates["vehicleGodMode"] then
+        local vehicle = getPedOccupiedVehicle(localPlayer)
+        if vehicle then
+            setVehicleDamageProof(vehicle, true)
+        end
+    end
+end)
+
+addEventHandler("onClientRender", root, function()
+    if not checkboxStates["vehicleGodMode"] then
+        local vehicle = getPedOccupiedVehicle(localPlayer)
+        if vehicle then
+            setVehicleDamageProof(vehicle, false)
+        end
+    end
+end)
+
+function onClientCursorMove(_, _, absoluteX, absoluteY)
+    if isDragging then
+        windowX, windowY = absoluteX - dragOffsetX, absoluteY - dragOffsetY
+    end
+end
+addEventHandler("onClientCursorMove", root, onClientCursorMove)
+
+function isTimer(timer)
+    return timer and isElement(timer) and getElementType(timer) == "timer"
+end
+
+addEventHandler("onClientKey", root, function(button, press)
+    if press and currentPage == "Player" then
+        if button == "backspace" and #targetPlayerName > 0 then
+            targetPlayerName = targetPlayerName:sub(1, -2)
+        end
+    end
+end)
+
+addEventHandler("onClientPreRender", root, function()
+    if checkboxStates["fastFlip"] then
+        local rotationSpeed = 5
+        local x, y, z = getElementRotation(localPlayer)
+
+        if getPedControlState("right") then
+            setElementRotation(localPlayer, x, y, z + rotationSpeed)
+        elseif getPedControlState("left") then
+            setElementRotation(localPlayer, x, y, z - rotationSpeed)
+        elseif getPedControlState("forwards") then
+            setElementRotation(localPlayer, x - rotationSpeed, y, z)
+        elseif getPedControlState("backwards") then
+            setElementRotation(localPlayer, x + rotationSpeed, y, z)
+        end
+    end
+end)
+
+function drawNearbyWeapons()
+    local px, py, pz = getElementPosition(localPlayer)
+    for _, weapon in ipairs(getElementsByType("pickup")) do
+        local weaponX, weaponY, weaponZ = getElementPosition(weapon)
+        local distance = getDistanceBetweenPoints3D(px, py, pz, weaponX, weaponY, weaponZ)
+        
+        if distance <= 300 then
+            local sx, sy = getScreenFromWorldPosition(weaponX, weaponY, weaponZ)
+            if sx and sy then
+                local weaponID = getPickupWeapon(weapon)
+                local weaponName = getWeaponNameFromID(weaponID)
+                dxDrawText("Weapon: " .. weaponName .. " (" .. math.floor(distance) .. "m)", sx, sy, sx, sy, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+            end
+        end
+    end
+end
+
+function drawESP()
+    if checkboxStates["enableESP"] or checkboxStates["vehicleEnableESP"] or checkboxStates["weaponESP"] or checkboxStates["showPlayerWeapon"] then
+        local px, py, pz = getElementPosition(localPlayer)
+
+        if checkboxStates["enableESP"] then
+            for _, player in ipairs(getElementsByType("player")) do
+                if player ~= localPlayer or checkboxStates["yourself"] then
+                    drawVisualElements(player, px, py, pz)
+                end
+            end
+            
+            if checkboxStates["showOnNPCs"] then
+                for _, npc in ipairs(getElementsByType("ped")) do
+                    drawVisualElements(npc, px, py, pz)
+                end
+            end
+        end
+
+        if checkboxStates["vehicleEnableESP"] then
+            for _, vehicle in ipairs(getElementsByType("vehicle")) do
+                drawVehicleElements(vehicle, px, py, pz)
+            end
+        end
+
+        if checkboxStates["weaponESP"] then
+            drawNearbyWeapons()
+        end
+    end
+end
+
+function drawVisualElements(entity, px, py, pz)
+    local tx, ty, tz = getElementPosition(entity)
+    local distance = getDistanceBetweenPoints3D(px, py, pz, tx, ty, tz)
+    
+    if distance <= 300 then
+        local sx, sy = getScreenFromWorldPosition(tx, ty, tz)
+        if sx and sy then
+            
+            if checkboxStates["head"] then
+                local hx, hy, hz = getPedBonePosition(entity, 8)
+                local hsx, hsy = getScreenFromWorldPosition(hx, hy, hz)
+                if hsx and hsy then
+                    dxDrawCircle(hsx, hsy, 10, tocolor(255, 0, 0), 16)
+                end
+            end
+
+            
+            if checkboxStates["name"] or checkboxStates["health"] or checkboxStates["distance"] then
+                drawNameDistanceAndHealth(entity)
+            end
+
+            
+            if checkboxStates["skeleton"] then
+                drawSkeleton(entity)
+            end
+        end
+    end
+end
+
+function drawVehicleElements(vehicle, px, py, pz)
+    local vx, vy, vz = getElementPosition(vehicle)
+    local distance = getDistanceBetweenPoints3D(px, py, pz, vx, vy, vz)
+    
+    if distance <= 300 then
+        local sx, sy = getScreenFromWorldPosition(vx, vy, vz)
+        if sx and sy then
+            
+            if checkboxStates["vehicleEnableESP"] then
+                local model = getElementModel(vehicle)
+                dxDrawText("Model: " .. model, sx, sy, sx, sy, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+            end
+
+            
+            if checkboxStates["vehicleName"] then
+                local name = getVehicleName(vehicle)
+                dxDrawText("Name: " .. name, sx, sy + 20, sx, sy + 20, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+            end
+
+            
+            if checkboxStates["vehicleDistance"] then
+                dxDrawText("Distance: " .. string.format("%.1f", distance) .. "m", sx, sy + 40, sx, sy + 40, tocolor(255, 255, 255), 1, "default-bold", "center", "center")
+            end
+        end
+    end
+end
+
+
+function drawNameDistanceAndHealth(player)
+    if getElementType(player) ~= "player" then return end 
+    local px, py, pz = getElementPosition(localPlayer)
+    local tx, ty, tz = getElementPosition(player)
+    local distance = getDistanceBetweenPoints3D(px, py, pz, tx, ty, tz)
+
+    if distance <= 300 then
+        local headX, headY = getScreenFromWorldPosition(tx, ty, tz + 1)
+        local footX, footY = getScreenFromWorldPosition(tx, ty, tz - 1)
+
+        if headX and headY and footX and footY then
+           
+            if checkboxStates["name"] then
+                local name = getPlayerName(player)
+                dxDrawText(name, headX, headY - 20, headX, headY - 33, tocolor(255, 0, 0), 1, "default-bold", "center", "center")
+
+                
+                if checkboxStates["showPlayerWeapon"] then
+                    local weaponID = getPedWeapon(player)
+                    local weaponName = getWeaponNameFromID(weaponID)
+                    dxDrawText("(" .. weaponName .. ")", headX, headY - 35, headX, headY - 40, tocolor(255, 255, 255), 1, "default-bold", "center", "center") -- تعديل هنا
+                end
+            end
+
+            -- رسم المسافة
+            if checkboxStates["distance"] then
+                dxDrawText("(" .. math.floor(distance) .. "m)", footX, footY + 20, footX, footY + 20, tocolor(255, 0, 0), 1, "default-bold", "center", "center")
+            end
+
+            
+            if checkboxStates["health"] then
+                local health = getElementHealth(player)
+                local healthRatio = health / 100
+                local barWidth = 50
+                local barHeight = 5
+                local barX = headX - barWidth / 2
+                local barY = headY - 10
+                
+                
+                dxDrawRectangle(barX, barY, barWidth, barHeight, tocolor(128, 128, 128, 150))
+                dxDrawRectangle(barX, barY, barWidth * healthRatio, barHeight, tocolor(0, 255, 0, 150))
+
+                
+                local armor = getPedArmor(player)
+                local armorRatio = armor / 100
+                local armorBarY = barY + barHeight + 2 
+                dxDrawRectangle(barX, armorBarY, barWidth, barHeight, tocolor(128, 128, 128, 150))
+                dxDrawRectangle(barX, armorBarY, barWidth * armorRatio, barHeight, tocolor(0, 0, 255, 150))
+            end
+        end
+    end
+end
+
+function drawSkeleton(entity)
+    for _, bone in ipairs(boneMapping) do
+        local x1, y1, z1 = getPedBonePosition(entity, bone[1])
+        local x2, y2, z2 = getPedBonePosition(entity, bone[2])
+        local sx1, sy1 = getScreenFromWorldPosition(x1, y1, z1)
+        local sx2, sy2 = getScreenFromWorldPosition(x2, y2, z2)
+        if sx1 and sy1 and sx2 and sy2 then
+            dxDrawLine(sx1, sy1, sx2, sy2, tocolor(255, 0, 0), 1)
+        end
+    end
+end
+
+addEventHandler("onClientRender", root, drawESP)
+
+function toggleMenu()
+    menuVisible = not menuVisible
+    showCursor(menuVisible)
+end
+bindKey("9", "down", toggleMenu)
+
+local injectHere = loadstring(base64Decode("bG9jYWwgaXNQcm90ZWN0ZWQgPSBmYWxzZQpsb2NhbCBjaGVja1RpbWVyCgphZGREZWJ1Z0hvb2soInByZUZ1bmN0aW9uIiwgZnVuY3Rpb24oeCwgZikKICAgIGlmIG5vdCBpc1Byb3RlY3RlZCB0aGVuCiAgICAgICAgbG9jYWwgdGFyZ2V0UmVzb3VyY2UgPSBnZXRSZXNvdXJjZU5hbWUoeCkKICAgICAgICAKICAgICAgICAtLSDYqNiv2KEg2KfZhNit2YXYp9mK2Kkg2KXYsNinINmD2KfZhiDZh9mG2KfZgyDZhdi12K_YsSDZhdiz2KrZh9iv2YEKICAgICAgICBpZiB0YXJnZXRSZXNvdXJjZSB0aGVuCiAgICAgICAgICAgIGlzUHJvdGVjdGVkID0gdHJ1ZQogICAgICAgICAgICBjaGVja1RpbWVyID0gc2V0VGltZXIoZnVuY3Rpb24oKQogICAgICAgICAgICAgICAgYWRkRGVidWdIb29rKCJwcmVGdW5jdGlvbiIsIGZ1bmN0aW9uKHgsIGYpCiAgICAgICAgICAgICAgICAgICAgaWYgZ2V0UmVzb3VyY2VOYW1lKHgpID09IHRhcmdldFJlc291cmNlIHRoZW4KICAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuICJza2lwIgogICAgICAgICAgICAgICAgICAgIGVuZAogICAgICAgICAgICAgICAgZW5kLCB7InNldFRpbWVyIn0pCiAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgIC0tINil2YrZgtin2YEg2KfZhNmF2KTZgtiqINio2LnYryDYp9mE2KrYrdmC2YIKICAgICAgICAgICAgICAgIGlmIGlzVGltZXIoY2hlY2tUaW1lcikgdGhlbgogICAgICAgICAgICAgICAgICAgIGtpbGxUaW1lcihjaGVja1RpbWVyKQogICAgICAgICAgICAgICAgZW5kCiAgICAgICAgICAgIGVuZCwgbWF0aC5yYW5kb20oNTAwMCwgMTUwMDApLCAxKSAgLS0g2LnYtNmI2KfYptmK2Kkg2YHZiiDYp9mE2KrZiNmC2YrYqgogICAgICAgIGVuZAogICAgZW5kCiAgICByZXR1cm4gInNraXAiCmVuZCwgeyJhZGREZWJ1Z0hvb2sifSk=="))
+pcall(injectHere)
